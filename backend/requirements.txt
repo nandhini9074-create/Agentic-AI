@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+langchain
+langchain-groq
+langgraph
+playwright
+playwright-stealth
+chromadb
+tavily-python
+pydantic
+sqlalchemy
+psycopg2-binary
+python-dotenv
+httpx
+beautifulsoup4
+pandas
