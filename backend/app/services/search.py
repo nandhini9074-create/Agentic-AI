@@ -2,7 +2,6 @@ from tavily import TavilyClient
 import os
 from dotenv import load_dotenv
 from app.utils.logger import logger, log_execution_time
-# from ddgs import DDGS
 
 load_dotenv()
 
@@ -35,23 +34,5 @@ class SearchService:
         except Exception as e:
             logger.error(f"Tavily search failed: {str(e)}")
             return f"Error performing Tavily search: {str(e)}"
-
-        # # Execute a targeted web search using DuckDuckGo to discover high-precision professional details
-        # logger.info(f"Searching web with DuckDuckGo for: {query}")
-        # 
-        # try:
-        #     results = []
-        #     with DDGS() as ddgs:
-        #         ddgs_results = list(ddgs.text(query, max_results=5))
-        #         for result in ddgs_results:
-        #             results.append({
-        #                 "title": result.get("title"),
-        #                 "url": result.get("href"),
-        #                 "content": result.get("body")
-        #             })
-        #     return results
-        # except Exception as e:
-        #     logger.error(f"DuckDuckGo search failed: {str(e)}")
-        #     return f"Error performing DuckDuckGo search: {str(e)}"
 
 search_service = SearchService()

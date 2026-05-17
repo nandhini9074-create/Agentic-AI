@@ -90,7 +90,6 @@ class Orchestrator:
         
         AVAILABLE TOOLS:
         - `scraper`: Requires {{"url": "string"}}. Use for Seed URLs first.
-        # - `apify_extract`: Requires {{"url": "string"}}. (DISABLED - Do not use)
         - `web_search`: Requires {{"query": "string"}}. Use for finding new info via Tavily.
         - `clay_enrich`: Requires {{"query": "string"}}. Use to find deep professional enrichment info (emails, skills).
         - `ner_extract`: Requires {{"text": "string"}}. Use to pull entities from raw text.
@@ -160,11 +159,6 @@ class Orchestrator:
                 observation = "Error: No query provided for web_search"
         elif action == "apify_extract":
             observation = "Error: Apify extraction is currently disabled."
-            # url = inp.get("url")
-            # if url:
-            #     observation = enrichment_service.apify_extract(url)
-            # else:
-            #     observation = "Error: No URL provided for apify_extract"
         elif action == "clay_enrich":
             query = inp.get("query")
             if query:
