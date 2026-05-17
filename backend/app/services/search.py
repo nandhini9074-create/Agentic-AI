@@ -22,7 +22,7 @@ class SearchService:
             return "Error: Tavily Search is not configured. Missing API key."
             
         try:
-            # Using search with 'search_depth="advanced"' for deeper professional context
+            # Using search with 'search_depth ="advanced"' for deeper professional context
             response = self.client.search(query=query, search_depth="advanced", max_results=5)
             results = []
             for result in response.get('results', []):

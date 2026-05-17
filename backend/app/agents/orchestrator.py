@@ -9,6 +9,7 @@ from app.services.scraper import scraper_service
 from app.services.search import search_service
 from app.services.ner import ner_service
 from app.services.memory import memory_service
+from app.services.enrichment import enrichment_service
 from app.utils.logger import logger, log_execution_time
 from app.utils.job_store import jobs
 #scrapling
@@ -89,14 +90,16 @@ class Orchestrator:
         
         AVAILABLE TOOLS:
         - `scraper`: Requires {{"url": "string"}}. Use for Seed URLs first.
-        - `web_search`: Requires {{"query": "string"}}. Use for finding new info.
+        # - `apify_extract`: Requires {{"url": "string"}}. (DISABLED - Do not use)
+        - `web_search`: Requires {{"query": "string"}}. Use for finding new info via Tavily.
+        - `clay_enrich`: Requires {{"query": "string"}}. Use to find deep professional enrichment info (emails, skills).
         - `ner_extract`: Requires {{"text": "string"}}. Use to pull entities from raw text.
         
         Respond in JSON format:
         {{
             "phase": "REASON",
             "thought": "your reasoning",
-            "action": "scraper" | "web_search" | "ner_extract",
+            "action": "scraper" | "web_search" | "clay_enrich" | "ner_extract",
             "action_input": {{ "url": "..." }} OR {{ "query": "..." }}
         }}
         """)
@@ -155,6 +158,19 @@ class Orchestrator:
                 observation = search_service.search(query)
             else:
                 observation = "Error: No query provided for web_search"
+        elif action == "apify_extract":
+            observation = "Error: Apify extraction is currently disabled."
+            # url = inp.get("url")
+            # if url:
+            #     observation = enrichment_service.apify_extract(url)
+            # else:
+            #     observation = "Error: No URL provided for apify_extract"
+        elif action == "clay_enrich":
+            query = inp.get("query")
+            if query:
+                observation = enrichment_service.clay_enrich(query)
+            else:
+                observation = "Error: No query provided for clay_enrich"
         elif action == "ner_extract":
             text = inp.get("text") or state.get("observation")
             if text:
