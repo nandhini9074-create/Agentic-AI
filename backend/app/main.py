@@ -14,6 +14,8 @@ from app.utils.logger import logger
 from app.db.database import SessionLocal, ProfileDB
 from app.utils.job_store import jobs
 import uuid
+from app.services.entity_discovery import entity_discovery_service
+from app.api.routes import router as rag_router
 
 app = FastAPI(title="Agentic AI Profiler")
 
@@ -26,10 +28,46 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount the new RAG Profile Generation routes
+app.include_router(rag_router, prefix="/api/rag", tags=["RAG Profile"])
+
 
 class ProfileRequest(BaseModel):
     name: str
-    urls: List[str]
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    skills: Optional[str] = None
+    age: Optional[str] = None
+    gender: Optional[str] = None
+    dob: Optional[str] = None
+    location: Optional[str] = None
+    language: Optional[str] = None
+    query: Optional[str] = None
+    urls: Optional[List[str]] = []
+
+class GenerateProfileRequest(BaseModel):
+    name: str
+    url: str
+
+class DiscoverEntityRequest(BaseModel):
+    url: str
+
+@app.post("/generate-profile")
+async def generate_profile(request: GenerateProfileRequest, background_tasks: BackgroundTasks):
+    # Entry point for single-URL requests as specified in Step 1. Maps seamlessly to the multi-source pipeline.
+    profile_req = ProfileRequest(
+        name=request.name,
+        email="unknown@email.com",
+        phone="unknown",
+        skills="Software Engineering",
+        urls=[request.url]
+    )
+    return await build_profile(profile_req, background_tasks)
+
+@app.post("/discover-entity")
+async def discover_entity(request: DiscoverEntityRequest):
+    # Step-by-step single-URL entity discovery and verification endpoint
+    return await entity_discovery_service.discover(request.url)
 
 @app.post("/build-profile")
 async def build_profile(request: ProfileRequest, background_tasks: BackgroundTasks):
@@ -46,7 +84,21 @@ async def build_profile(request: ProfileRequest, background_tasks: BackgroundTas
     logger.info(f"Starting new profile build job: {job_id} for {request.name}")
     jobs[job_id] = {"status": "running", "steps": []} #Store Job State
     
-    background_tasks.add_task(run_agent, job_id, request.name, request.urls)
+    background_tasks.add_task(
+        run_agent, 
+        job_id, 
+        request.name, 
+        request.email,
+        request.phone,
+        request.skills,
+        request.age,
+        request.gender,
+        request.dob,
+        request.location,
+        request.language,
+        request.query,
+        request.urls or []
+    )
     
     return {"job_id": job_id}
 
@@ -65,12 +117,49 @@ async def cancel_job(job_id: str):
         return {"message": "Job cancellation requested"}
     return {"error": "Job not found"}, 404
 
-async def run_agent(job_id: str, name: str, urls: List[str]):
+async def run_agent(
+    job_id: str,
+    name: str,
+    email: Optional[str],
+    phone: Optional[str],
+    skills: Optional[str],
+    age: Optional[str],
+    gender: Optional[str],
+    dob: Optional[str],
+    location: Optional[str],
+    language: Optional[str],
+    query: Optional[str],
+    urls: List[str]
+):
     # Main background execution loop that orchestrates the agentic workflow and saves the final result
     logger.info(f"Agent thread started for job {job_id}")
+    
+    # Automatically clean up old temporary scraping and RAG logs on new trigger
+    import os
+    temp_file_path = "d:\\Agentic-AI\\temp_scraped_data.json"
+    temp_rag_path = "d:\\Agentic-AI\\temp_rag_matched_data.json"
+    temp_search_path = "d:\\Agentic-AI\\temp_search_data.json"
+    
+    for path in [temp_file_path, temp_rag_path, temp_search_path]:
+        if os.path.exists(path):
+            try:
+                os.remove(path)
+                logger.info(f"Successfully cleaned up old temporary cache: {path}")
+            except Exception as e:
+                logger.error(f"Failed to clear cache file {path}: {str(e)}")
+            
     try:
         initial_state = {
             "name": name,
+            "email": email,
+            "phone": phone,
+            "skills": skills,
+            "age": age,
+            "gender": gender,
+            "dob": dob,
+            "location": location,
+            "language": language,
+            "query": query,
             "urls": urls,
             "data": {},
             "next_action": None,
@@ -80,7 +169,8 @@ async def run_agent(job_id: str, name: str, urls: List[str]):
             "history": [],
             "phase": "REASON",
             "complete": False,
-            "job_id": job_id
+            "job_id": job_id,
+            "step_count": 0
         }
         
         async for output in orchestrator.app.astream(initial_state):

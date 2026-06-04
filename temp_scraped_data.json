@@ -1,0 +1,44 @@
+[
+    {
+        "timestamp": "2026-06-04 15:07:42",
+        "job_id": "56f916c9-4150-416a-9f05-8d645f3fd1c6",
+        "target_name": "Nandhini.S",
+        "action": "scraper",
+        "action_input": {
+            "url": "https://in.linkedin.com/in/nandhini-s1104"
+        },
+        "word_count": 0,
+        "scraped_payload": {
+            "error": "Error scraping: LinkedIn is blocking access with an Auth Wall.",
+            "source_url": "https://in.linkedin.com/in/nandhini-s1104"
+        }
+    },
+    {
+        "timestamp": "2026-06-04 15:07:42",
+        "job_id": "56f916c9-4150-416a-9f05-8d645f3fd1c6",
+        "target_name": "Nandhini.S",
+        "action": "scraper",
+        "action_input": {
+            "url": "https://in.linkedin.com/in/nandhinis26"
+        },
+        "word_count": 0,
+        "scraped_payload": {
+            "error": "Error scraping: LinkedIn is blocking access with an Auth Wall.",
+            "source_url": "https://in.linkedin.com/in/nandhinis26"
+        }
+    },
+    {
+        "timestamp": "2026-06-04 15:07:42",
+        "job_id": "56f916c9-4150-416a-9f05-8d645f3fd1c6",
+        "target_name": "Nandhini.S",
+        "action": "scraper",
+        "action_input": {
+            "url": "https://in.linkedin.com/in/nandhini-sevugan"
+        },
+        "word_count": 0,
+        "scraped_payload": {
+            "error": "Error scraping: LinkedIn is blocking access with an Auth Wall.",
+            "source_url": "https://in.linkedin.com/in/nandhini-sevugan"
+        }
+    }
+]

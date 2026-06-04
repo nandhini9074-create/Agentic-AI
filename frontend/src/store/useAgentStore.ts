@@ -3,7 +3,7 @@ import { AgentStep, FinalProfile, Phase } from '../types/agent';
 
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 interface AgentStore {
   status: 'idle' | 'running' | 'completed' | 'error';
@@ -12,7 +12,19 @@ interface AgentStore {
   error: string | null;
   currentJobId: string | null;
   
-  startAgent: (name: string, urls: string[]) => Promise<void>;
+  startAgent: (payload: {
+    name: string;
+    email?: string;
+    phone?: string;
+    skills?: string;
+    age?: string;
+    gender?: string;
+    dob?: string;
+    location?: string;
+    language?: string;
+    query?: string;
+    urls?: string[];
+  }) => Promise<void>;
   stopAgent: () => Promise<void>;
   pollJobStatus: (jobId: string) => Promise<void>;
   addStep: (step: AgentStep) => void;
@@ -28,11 +40,11 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
   currentJobId: null,
   error: null,
 
-  startAgent: async (name, urls) => {
+  startAgent: async (payload) => {
     set({ status: 'running', steps: [], finalProfile: null, error: null, currentJobId: null });
     
     try {
-      const response = await axios.post(`${API_BASE_URL}/build-profile`, { name, urls });
+      const response = await axios.post(`${API_BASE_URL}/build-profile`, payload);
       const { job_id } = response.data;
       set({ currentJobId: job_id });
       get().pollJobStatus(job_id);
@@ -60,7 +72,13 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
 
       try {
         const response = await axios.get(`${API_BASE_URL}/job/${jobId}`);
-        const { status, steps, data } = response.data;
+        
+        if (response.data.error) {
+          set({ status: 'error', error: response.data.error, currentJobId: null });
+          return;
+        }
+
+        const { status, steps = [], data } = response.data;
 
         if (status === 'cancelled') {
            set({ status: 'idle', currentJobId: null });
