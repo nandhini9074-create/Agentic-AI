@@ -5,33 +5,64 @@ import { InputForm } from '@/components/InputForm';
 import { AgentTimeline } from '@/components/AgentTimeline';
 import { ProfileDashboard } from '@/components/ProfileDashboard';
 import { useAgentStore } from '@/store/useAgentStore';
-import { mockProfile } from '@/mockData';
-import { Sparkles, History, Bot, Zap } from 'lucide-react';
+import { mockProfile, mockSportsProfile, mockTechNormalProfile } from '@/mockData';
+import { Sparkles, History, Bot, Zap, Trophy, Cpu } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Home() {
   const { status, setFinalProfile, addStep, reset, stopAgent, error } = useAgentStore();
 
-  const simulateAgent = async () => {
+  const simulateAgent = async (type: 'tech' | 'sports' | 'tech_normal' = 'tech') => {
     reset();
     
-    const simulationSteps = [
-      { phase: 'REASON', thought: 'Analyzing provided URLs to prioritize data extraction sources. LinkedIn seems most relevant for bio and experience.', timestamp: '12:00:01' },
-      { phase: 'ACT', action: 'scraper', action_input: { url: 'https://linkedin.com/in/elenavance' }, timestamp: '12:00:05' },
-      { phase: 'OBSERVE', observation: 'Successfully extracted LinkedIn profile. Found current role: Lead AI Scientist at Aether Dynamics.', timestamp: '12:00:12' },
-      { phase: 'REASON', thought: 'Need to verify project details and technical skills. Checking GitHub for repositories and contributions.', timestamp: '12:00:15' },
-      { phase: 'ACT', action: 'scraper', action_input: { url: 'https://github.com/evance' }, timestamp: '12:00:20' },
-      { phase: 'OBSERVE', observation: 'Found multiple high-star repositories in Rust and Python. Key project "LumenCore" identified.', timestamp: '12:00:30' },
-      { phase: 'REFLECT', reflection: 'Data is consistent between professional bio and technical contributions. High confidence in skills and experience sections.', timestamp: '12:00:35' },
-      { phase: 'REASON', thought: 'Performing final synthesis and generating professional insights based on extracted data.', timestamp: '12:00:40' },
-    ];
+    let simulationSteps = [];
+    if (type === 'sports') {
+      simulationSteps = [
+        { phase: 'REASON', thought: 'Analyzing sports history databases, club records, and social handles to extract athlete profile metrics.', timestamp: '12:00:01' },
+        { phase: 'ACT', action: 'scraper', action_input: { url: 'https://instagram.com/leomessi' }, timestamp: '12:00:05' },
+        { phase: 'OBSERVE', observation: 'Successfully verified Inter Miami current contract and Instagram post history.', timestamp: '12:00:12' },
+        { phase: 'REASON', thought: 'Need to cross-reference historical club achievements (Barcelona, PSG) and official tournament statistics.', timestamp: '12:00:15' },
+        { phase: 'ACT', action: 'scraper', action_input: { url: 'https://fcbarcelona.com/history' }, timestamp: '12:00:20' },
+        { phase: 'OBSERVE', observation: 'Confirmed 672 Barcelona goals and 10 La Liga titles. Verified 2022 FIFA World Cup Golden Ball award.', timestamp: '12:00:30' },
+        { phase: 'REFLECT', reflection: 'Trophy cabinet and stats fully corroborated. High confidence in athletic specialties and club history.', timestamp: '12:00:35' },
+        { phase: 'REASON', thought: 'Aggregating final sports credentials and playstyle insights.', timestamp: '12:00:40' },
+      ];
+    } else if (type === 'tech_normal') {
+      simulationSteps = [
+        { phase: 'REASON', thought: 'Initializing search targets for corporate bio, enterprise product portfolios, and developer communities.', timestamp: '12:00:01' },
+        { phase: 'ACT', action: 'scraper', action_input: { url: 'https://linkedin.com/in/nandhini-s-tech' }, timestamp: '12:00:05' },
+        { phase: 'OBSERVE', observation: 'Retrieved profile for Nandhini S. Confirmed title: Lead Technical Product Manager at SynthAI Systems.', timestamp: '12:00:12' },
+        { phase: 'REASON', thought: 'Checking developer ecosystems, API specifications, and public architectures. Inspecting GitHub for enterprise contributions.', timestamp: '12:00:15' },
+        { phase: 'ACT', action: 'scraper', action_input: { url: 'https://github.com/nandhini-s' }, timestamp: '12:00:20' },
+        { phase: 'OBSERVE', observation: 'Found product-management and architectural specifications for "DevForge Platform" and "CloudShield Edge".', timestamp: '12:00:30' },
+        { phase: 'REFLECT', reflection: 'Multi-source alignment confirmed. Data suggests a strong hybrid profile with system architecture and product-technical leadership.', timestamp: '12:00:35' },
+        { phase: 'REASON', thought: 'Compiling premium Indigo-themed tech-normal dossier briefing.', timestamp: '12:00:40' },
+      ];
+    } else {
+      simulationSteps = [
+        { phase: 'REASON', thought: 'Analyzing provided URLs to prioritize data extraction sources. LinkedIn seems most relevant for bio and experience.', timestamp: '12:00:01' },
+        { phase: 'ACT', action: 'scraper', action_input: { url: 'https://linkedin.com/in/elenavance' }, timestamp: '12:00:05' },
+        { phase: 'OBSERVE', observation: 'Successfully extracted LinkedIn profile. Found current role: Lead AI Scientist at Aether Dynamics.', timestamp: '12:00:12' },
+        { phase: 'REASON', thought: 'Need to verify project details and technical skills. Checking GitHub for repositories and contributions.', timestamp: '12:00:15' },
+        { phase: 'ACT', action: 'scraper', action_input: { url: 'https://github.com/evance' }, timestamp: '12:00:20' },
+        { phase: 'OBSERVE', observation: 'Found multiple high-star repositories in Rust and Python. Key project "LumenCore" identified.', timestamp: '12:00:30' },
+        { phase: 'REFLECT', reflection: 'Data is consistent between professional bio and technical contributions. High confidence in skills and experience sections.', timestamp: '12:00:35' },
+        { phase: 'REASON', thought: 'Performing final synthesis and generating professional insights based on extracted data.', timestamp: '12:00:40' },
+      ];
+    }
 
     for (const step of simulationSteps) {
       addStep(step as any);
-      await new Promise(r => setTimeout(r, 1500));
+      await new Promise(r => setTimeout(r, 1000));
     }
 
-    setFinalProfile(mockProfile);
+    setFinalProfile(
+      type === 'sports' 
+        ? mockSportsProfile 
+        : type === 'tech_normal' 
+          ? mockTechNormalProfile 
+          : mockProfile
+    );
   };
 
   return (
@@ -73,12 +104,28 @@ export default function Home() {
               </div>
             )}
             <button 
-              onClick={simulateAgent}
+              onClick={() => simulateAgent('tech')}
               disabled={status === 'running'}
-              className="px-6 py-3 bg-zinc-900 border border-zinc-800 rounded-2xl text-sm font-semibold hover:bg-zinc-800 transition-all flex items-center gap-2"
+              className="px-4 py-2.5 bg-zinc-900/80 border border-zinc-800 hover:border-zinc-700 rounded-xl text-xs font-bold hover:bg-zinc-800 transition-all flex items-center gap-2"
             >
-              <Zap size={16} className="text-amber-400" />
-              Simulate
+              <Zap size={14} className="text-amber-400" />
+              Simulate Tech
+            </button>
+            <button 
+              onClick={() => simulateAgent('tech_normal')}
+              disabled={status === 'running'}
+              className="px-4 py-2.5 bg-zinc-900/80 border border-zinc-800 hover:border-zinc-700 rounded-xl text-xs font-bold hover:bg-zinc-800 transition-all flex items-center gap-2"
+            >
+              <Cpu size={14} className="text-indigo-400" />
+              Simulate Tech/Normal
+            </button>
+            <button 
+              onClick={() => simulateAgent('sports')}
+              disabled={status === 'running'}
+              className="px-4 py-2.5 bg-zinc-900/80 border border-zinc-800 hover:border-zinc-700 rounded-xl text-xs font-bold hover:bg-zinc-800 transition-all flex items-center gap-2"
+            >
+              <Trophy size={14} className="text-amber-400" />
+              Simulate Sports
             </button>
             <div className="h-10 w-px bg-zinc-800"></div>
             <div className="flex -space-x-2">

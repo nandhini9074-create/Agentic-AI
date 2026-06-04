@@ -13,4 +13,6 @@ psycopg2-binary
 python-dotenv
 httpx
 beautifulsoup4
-pandas
+sentence-transformers
+qdrant-client
+trafilatura
