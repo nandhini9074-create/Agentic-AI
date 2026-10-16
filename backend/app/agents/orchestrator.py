@@ -29,9 +29,10 @@ class AgentState(TypedDict):
 class Orchestrator:
     def __init__(self):
         # Initialize LLM with Groq API and setup the LangGraph workflow
+        model_name = os.getenv("GROQ_MODEL", "qwen/qwen3.8-27b")
         self.llm = ChatGroq(
             api_key=os.getenv("GROQ_API_KEY"),
-            model_name="llama-3.1-8b-instant", # Switched to 8b to resolve 429 Rate Limit
+            model_name=model_name,
             temperature=0
         ).bind(response_format={"type": "json_object"})
         self.setup_graph()
@@ -380,7 +381,7 @@ class Orchestrator:
         return {
             "phase": "FINAL",
             "data": res,
-            "history": state["history"] + [res]
+            "history": [res]
         }
 
     def clean_json(self, text: str):

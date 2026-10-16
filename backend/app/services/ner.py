@@ -16,10 +16,10 @@ class ExtractedEntities(BaseModel):
 
 class NERService:
     def __init__(self):
-        # Initialize the Groq LLM with structured output capabilities for entity extraction
+        model_name = os.getenv("GROQ_MODEL", "qwen/qwen3.8-27b")
         self.llm = ChatGroq(
             api_key=os.getenv("GROQ_API_KEY"),
-            model_name="llama-3.1-8b-instant", # Switched to 8b for better rate limits
+            model_name=model_name,
             temperature=0
         )
         self.structured_llm = self.llm.with_structured_output(ExtractedEntities)
